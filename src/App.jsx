@@ -29,27 +29,50 @@ const App = () => {
     }
   })
   return (
-    <div>
+    <Router>
       <Navbar />
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/all-books" element={<AllBooks />} />
-        <Route path="/login" element={<LogIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/profile" element={<Profile />} >
-          {role === "user" ? <Route index element={<Favourites />}/> : <Route index element={<AllOrders />}/>}
-          <Route path="/profile/orderHistory" element={<UserOrderHistory />}/>
-          {role === "admin" && <Route path="/profile/add-book" element={<AddBook />}/>}
-          <Route path="/profile/settings" element={<Settings />}/>
-        </Route>
-        <Route path="/cart" element={<Cart />} />
         <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/update-book/:id" element={<UpdateBook />} />
-        <Route path="/view-book-details/:id" element={<BookDetails />}/>
+        <Route path="/view-book-details/:id" element={<BookDetails />} />
+        <Route path="/login" element={!isLoggedIn ? <LogIn /> : <Navigate to="/" />} />
+        <Route path="/signup" element={!isLoggedIn ? <SignUp /> : <Navigate to="/" />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/profile"
+          element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
+        >
+          <Route
+            index
+            element={role === "admin" ? <AllOrders /> : <Favourites />}
+          />
+          <Route path="order-history" element={<UserOrderHistory />} />
+          <Route path="settings" element={<Settings />} />
+
+          {role === "admin" && (
+            <Route path="add-book" element={<AddBook />} />
+          )}
+        </Route>
+
+        {role === "admin" && (
+          <Route path="/update-book/:id" element={<UpdateBook />} />
+        )}
+
+        <Route
+          path="/cart"
+          element={isLoggedIn ? <Cart /> : <Navigate to="/login" />}
+        />
+
+        {/* 404 */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+
       <Footer />
-    </div>
-  )
+    </Router>
+  );
 }
 
 export default App
